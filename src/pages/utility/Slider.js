@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, Image, ScrollView, Dimensions } from 'react-native';
 
 const {width} = Dimensions.get("window");
-const height = width * 0.8;
+const height = width;
  
 class Slider extends React.Component {
     
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
         margin: 3
     },
     dotTextActive: {
-        color: '#fff',
+        color: '#000',
         margin: 3
     },
 });

@@ -3,8 +3,9 @@ import { StyleSheet, Text, View, TouchableOpacity} from 'react-native';
 import Slider from './utility/Slider'
 
 const images = [
-    "https://orthostudio.ca/wp-content/uploads/2016/11/image-3.jpg",
-    "https://miro.medium.com/max/1838/1*mk1-6aYaf_Bes1E3Imhc0A.jpeg",
+    "https://github.com/Blue01H/LinkedFate/blob/main/src/img/IMG%201.jpeg?raw=true",
+    "https://github.com/Blue01H/LinkedFate/blob/main/src/img/IMG%202.jpeg?raw=true",
+    "https://github.com/Blue01H/LinkedFate/blob/main/src/img/MG%203.jpeg?raw=true"
 ]
  
 class Welcome extends React.Component {
