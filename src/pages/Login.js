@@ -4,6 +4,32 @@ import { StyleSheet, Text, View, TextInput,TouchableOpacity } from 'react-native
 
 class Login extends React.Component {
 
+    state = {
+        email: '',
+        password: ''
+      }
+    
+    signIn() {
+      const email = this.state.email;
+      const password = this.state.password;
+  
+      const jsonSignIn = {
+        email: email,
+        password: password
+      } 
+  
+      fetch('http://localhost:3000/login', {
+        method: "POST",
+        body: JSON.stringify(jsonSignIn),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      }).then(response => response.text())
+        .catch(error => console.log(`Server Error${error}`))
+        .then(token => console.log(token))
+      
+    }
+
     render() {
         return (
             <View style={styles.container}>
@@ -24,12 +50,16 @@ class Login extends React.Component {
                     <View style={{ paddingBottom: 8 }}>
                         <TextInput
                             placeholder="Email"
+                            onChangeText={email => this.setState({email})}
+                            value = {this.state.email}
                             style={styles.inputText} />
                     </View>
 
                     <View style={{ paddingBottom: 8 }}>
                         <TextInput
                             placeholder="Password"
+                            onChangeText={password => this.setState({password})}
+                            value = {this.state.password}
                             style={styles.inputText} />
                     </View>
 
@@ -37,7 +67,7 @@ class Login extends React.Component {
 
                 <View style={styles.btnSpace}>
                    
-                    <TouchableOpacity style={styles.loginBtn}>
+                    <TouchableOpacity style={styles.loginBtn} onPress = {this.signIn.bind(this)}>
                         <Text style={styles.logoText}>Continue</Text>
                     </TouchableOpacity>
 

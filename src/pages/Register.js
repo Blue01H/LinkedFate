@@ -4,6 +4,44 @@ import { StyleSheet, Text, View, TextInput,TouchableOpacity } from 'react-native
 
 class Register extends React.Component {
 
+    state = {
+        firstN: '',
+        lastN: '',
+        password: '',
+        cPassword: '',
+        email: '',
+        phoneNumber: ''
+      }
+    
+    Regist() {
+      const firstN = this.state.firstN;
+      const lastN = this.state.lastN;
+      const password = this.state.password;
+      const cPassword = this.state.cPassword;
+      const email = this.state.email;
+      const phoneNumber = this.state.phoneNumber;
+
+      const jsonRegister = {
+        firstN: firstN,
+        lastN: lastN,
+        password: password,
+        cPassword: cPassword,
+        email: email,
+        phoneNumber: phoneNumber
+      } 
+  
+      fetch('http://localhost:3000/register', {
+        method: "POST",
+        body: JSON.stringify(jsonRegister),
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      }).then(response => response.text())
+        .catch(error => console.log(`Server Error${error}`))
+        .then(token => console.log(token))
+      
+    }
+
     render() {
         return (
             <View style={styles.container}>
@@ -23,38 +61,50 @@ class Register extends React.Component {
                     <View style={{ paddingBottom: 8 }}>
                         <TextInput
                             placeholder="First Name"
+                            onChangeText={firstN => this.setState({firstN})}
+                            value = {this.state.firstN}
                             style={styles.inputText} />
                     </View>
                      <View style={{ paddingBottom: 8 }}>
                         <TextInput
                             placeholder="Last Name"
+                            onChangeText={lastN => this.setState({lastN})}
+                            value = {this.state.LastN}
                             style={styles.inputText} />
                     </View>
                     <View style={{ paddingBottom: 8 }}>
                         <TextInput
                             placeholder="Password"
+                            onChangeText={password => this.setState({password})}
+                            value = {this.state.password}
                             style={styles.inputText} />
                     </View>
                     <View style={{ paddingBottom: 8 }}>
                         <TextInput
                             placeholder="Confirm Password"
+                            onChangeText={cPassword => this.setState({cPassword})}
+                            value = {this.state.cPassword}
                             style={styles.inputText} />
                     </View>
                     <View style={{ paddingBottom: 8 }}>
                         <TextInput
                             placeholder="Email"
+                            onChangeText={email => this.setState({email})}
+                            value = {this.state.email}
                             style={styles.inputText} />
                     </View>
                     <View style={{ paddingBottom: 8 }}>
                         <TextInput
                             placeholder="Phone Number"
+                            onChangeText={phoneNumber => this.setState({phoneNumber})}
+                            value = {this.state.phoneNumber}
                             style={styles.inputText} />
                     </View>
 
                 </View>
 
                 <View style={styles.btnSpace}>
-                    <TouchableOpacity style={styles.loginBtn}>
+                    <TouchableOpacity style={styles.loginBtn} onPress = {this.Regist.bind(this)}>
                         <Text style={styles.logoText}>Sign in</Text>
                     </TouchableOpacity>
                 </View>
