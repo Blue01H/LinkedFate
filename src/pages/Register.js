@@ -2,7 +2,7 @@ import React from 'react';
 import { StyleSheet, Text, View, TextInput,TouchableOpacity } from 'react-native';
 
 
-class Login extends React.Component {
+class Register extends React.Component {
 
     render() {
         return (
@@ -16,37 +16,53 @@ class Login extends React.Component {
                 </View>
 
                 <View>
-                    <Text style={styles.signInText}>Sign in</Text>
+                    <Text style={styles.signInText}>Register</Text>
                 </View>
 
                 <View style={styles.column}>
-                   
+                    <View style={{ paddingBottom: 8 }}>
+                        <TextInput
+                            placeholder="First Name"
+                            style={styles.inputText} />
+                    </View>
+                     <View style={{ paddingBottom: 8 }}>
+                        <TextInput
+                            placeholder="Last Name"
+                            style={styles.inputText} />
+                    </View>
+                    <View style={{ paddingBottom: 8 }}>
+                        <TextInput
+                            placeholder="Password"
+                            style={styles.inputText} />
+                    </View>
+                    <View style={{ paddingBottom: 8 }}>
+                        <TextInput
+                            placeholder="Confirm Password"
+                            style={styles.inputText} />
+                    </View>
                     <View style={{ paddingBottom: 8 }}>
                         <TextInput
                             placeholder="Email"
                             style={styles.inputText} />
                     </View>
-
                     <View style={{ paddingBottom: 8 }}>
                         <TextInput
-                            placeholder="Password"
+                            placeholder="Phone Number"
                             style={styles.inputText} />
                     </View>
 
                 </View>
 
                 <View style={styles.btnSpace}>
-                   
                     <TouchableOpacity style={styles.loginBtn}>
-                        <Text style={styles.logoText}>Continue</Text>
+                        <Text style={styles.logoText}>Sign in</Text>
                     </TouchableOpacity>
-
                 </View>
 
             </View>
         );
     }
-} export default Login;
+} export default Register;
 
 const styles = StyleSheet.create({
     container: {
@@ -126,7 +142,7 @@ const styles = StyleSheet.create({
         height: 50,
         alignItems: "center",
         justifyContent: "center",
-        marginTop: 35,
+        marginTop: 40,
         marginBottom: 10,
     },
     registerBtn: {
