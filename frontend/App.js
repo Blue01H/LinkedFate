@@ -1,30 +1,24 @@
+import "react-native-gesture-handler";
 import React, { useEffect, useState } from "react";
-import { Route } from "react-router";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
-  ActivityIndicator,
-} from "react-native";
+import { ActivityIndicator } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 import Welcome from "./src/pages/welcome";
 
 import Login from "./src/pages/Login";
 import Register from "./src/pages/Register";
-import { BrowserRouter } from "react-router-dom";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useHistory } from "react-router/esm/react-router";
-
 function SimpleDashboard() {
   return "that is a dashboard.";
 }
 
-function Auth({ children }) {
-  const history = useHistory();
+const Stack = createStackNavigator();
 
+export default function App() {
   const [token, setToken] = useState(null);
   const [isLoaded, setLoaded] = useState(false);
+
   useEffect(() => {
     AsyncStorage.getItem("@storage_token")
       .then((token) => {
@@ -33,35 +27,24 @@ function Auth({ children }) {
       .finally(() => setLoaded(true));
   }, []);
 
-  if (isLoaded && !token) history.push("/login");
-  if (isLoaded && token) return children;
-  return <ActivityIndicator animating={true} />;
-}
+  const protectedStack = (
+    <>
+      <Stack.Screen name="dashboard" component={SimpleDashboard} />
+    </>
+  );
 
-export default function App() {
+  const isLoggedIn = isLoaded && token;
+  if (!isLoaded) {
+    return <ActivityIndicator animating={true} />;
+  }
   return (
-    <BrowserRouter>
-      <Route exact path="/login" component={Login}></Route>
-      <Route exact path="/register" component={Register}></Route>
-      <Route exact path="/welcome" component={Welcome}></Route>
-      <Route exact path="/" component={Welcome}></Route>
-
-      <Route
-        exact
-        path="/dashboard"
-        render={() => (
-          <Auth>
-            <SimpleDashboard />
-          </Auth>
-        )}
-      />
-    </BrowserRouter>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="welcome" component={Welcome} />
+        <Stack.Screen name="login" component={Login} />
+        <Stack.Screen name="register" component={Register} />
+        {isLoggedIn && protectedStack}
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-});

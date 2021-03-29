@@ -1,6 +1,5 @@
 import React from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
-import { useHistory } from "react-router/esm/react-router";
 import Slider from "./utility/Slider";
 
 const images = [
@@ -9,8 +8,7 @@ const images = [
   "https://github.com/Blue01H/LinkedFate/blob/main/src/img/MG%203.jpeg?raw=true",
 ];
 
-function Welcome() {
-  const history = useHistory();
+function Welcome({ navigation }) {
   return (
     <View style={styles.container}>
       <View style={styles.logoSpace}>
@@ -25,13 +23,13 @@ function Welcome() {
       <View style={styles.btnSpace}>
         <TouchableOpacity
           style={styles.loginBtn}
-          onPress={() => history.push("/login")}
+          onPress={() => navigation.navigate("login")}
         >
           <Text style={styles.logoText}>Sign in</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.registerBtn}
-          onPress={() => history.push("/register")}
+          onPress={() => navigation.navigate("register")}
         >
           <Text style={styles.baseText}>Register</Text>
         </TouchableOpacity>

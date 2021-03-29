@@ -7,12 +7,10 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import { useHistory } from "react-router/esm/react-router";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-function Register() {
-  const history = useHistory();
+function Register({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [names, setNames] = useState("");
@@ -44,7 +42,7 @@ function Register() {
       if (response.status == 200) {
         const token = await response.text();
         await AsyncStorage.setItem("@storage_token", token);
-        history.push("/dashboard");
+        navigation.navigate("dashboard");
       } else {
         const text = await response.text();
         throw new Error(text);
