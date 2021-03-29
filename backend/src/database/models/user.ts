@@ -7,7 +7,16 @@ export default class User extends Model{
 
     @Unique
     @Column
-    username: string
+    email: string
+
+    @Column
+    names: string
+
+    @Column
+    surnames: string
+
+    @Column
+    phone: string
 
     @ForeignKey(() => Role)
     @Column

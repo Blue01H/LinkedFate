@@ -93,6 +93,8 @@ const styles = StyleSheet.create({
         marginTop: 15,
         marginLeft: 15,
     },
-    usernameText
+    usernameText: {
+        
+    }
 
 })

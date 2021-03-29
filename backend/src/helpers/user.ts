@@ -3,8 +3,11 @@ import database from "../database";
 const { User } = database.models;
 
 interface UserData{
-    username: string,
+    email: string,
     password: string
+    names: string,
+    surnames: string,
+    phone: string
 }
 
 interface UserOptions{
@@ -13,7 +16,7 @@ interface UserOptions{
 
 interface UserTarget{
     id?:number,
-    username?:string,
+    email?:string,
     password?:string
 }
 
@@ -40,8 +43,11 @@ async function read(target: UserTarget){
     const role = await user.getRole();
     return {
         id: user.id,
-        username: user.username,
+        email: user.email,
         role: role,
+        phone: user.phone,
+        names: user.names,
+        surnames: user.surnames,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
     };
