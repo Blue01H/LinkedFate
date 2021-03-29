@@ -5,13 +5,12 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import Welcome from "./src/pages/welcome";
 
+import Welcome from "./src/pages/welcome";
 import Login from "./src/pages/Login";
 import Register from "./src/pages/Register";
+import Dashboard from "./src/pages/Dashboard";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-function SimpleDashboard() {
-  return "that is a dashboard.";
-}
 
 const Stack = createStackNavigator();
 
@@ -29,7 +28,7 @@ export default function App() {
 
   const protectedStack = (
     <>
-      <Stack.Screen name="dashboard" component={SimpleDashboard} />
+      <Stack.Screen name="dashboard" component={Dashboard} />
     </>
   );
 
