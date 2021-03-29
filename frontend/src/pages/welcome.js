@@ -29,7 +29,10 @@ function Welcome() {
         >
           <Text style={styles.logoText}>Sign in</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.registerBtn}>
+        <TouchableOpacity
+          style={styles.registerBtn}
+          onPress={() => history.push("/register")}
+        >
           <Text style={styles.baseText}>Register</Text>
         </TouchableOpacity>
       </View>
