@@ -43,7 +43,11 @@ router.get("/user/all", auth, async (req: UserRequest, res) => {
 
 router.post("/user", async (req, res) => {
   try {
-    const token = await User.register(req.body);
+    const { role } = req.body;
+    if (role) {
+      delete req.body.role;
+    }
+    const token = await User.register(req.body, role);
     res.status(200).send(token);
   } catch (e) {
     res.status(500).send(e.message);
@@ -77,7 +81,7 @@ router.delete("/user", auth, async (req: UserRequest, res) => {
   }
 });
 
-router.post("/post", async (req: UserRequest, res) => {
+router.post("/post", auth, async (req: UserRequest, res) => {
   try {
     const { content } = req.body;
     const post = await Post.createPost(req.user.id, content);
@@ -113,7 +117,7 @@ router.delete("/post", auth, async (req: UserRequest, res) => {
   }
 });
 
-router.post("/follow", async (req: UserRequest, res) => {
+router.post("/follow", auth, async (req: UserRequest, res) => {
   try {
     const { usersId } = req.body;
     await Follow.follow(req.user.id, usersId);

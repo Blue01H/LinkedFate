@@ -7,8 +7,9 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import config from "../config";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setToken } from "../controllers/user";
 
 function Login({ navigation }) {
   const [email, setEmail] = useState("");
@@ -23,7 +24,7 @@ function Login({ navigation }) {
     };
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/login", {
+      const response = await fetch(`${config.API_URL}/login`, {
         method: "POST",
         body: JSON.stringify(jsonSignIn),
         headers: {
@@ -32,7 +33,7 @@ function Login({ navigation }) {
       });
       if (response.status == 200) {
         const token = await response.text();
-        await AsyncStorage.setItem("@storage_token", token);
+        await setToken(token);
         navigation.navigate("dashboard");
       } else {
         const text = await response.text();
@@ -46,7 +47,10 @@ function Login({ navigation }) {
   }
   return (
     <View style={styles.container}>
-      <View style={styles.logoSpace}>
+      <View
+        style={styles.logoSpace}
+        onTouchStart={() => navigation.navigate("welcome")}
+      >
         <Text style={styles.baseText}>Linked</Text>
         <View style={styles.square}>
           <Text style={styles.logoText}>Fate</Text>

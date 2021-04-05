@@ -25,7 +25,7 @@ async function createDatabase() {
  * @returns {Array[Sequelize, Models]}
  */
 function getDatabase() {
-  const models = [Role, User];
+  const models = [Role, User, Follow, Post];
   const sequelize = new Sequelize(databaseConfig);
   sequelize.addModels(models);
   return {

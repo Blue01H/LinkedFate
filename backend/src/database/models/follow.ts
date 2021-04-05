@@ -1,17 +1,22 @@
-import { Table, Model, HasOne, Column } from "sequelize-typescript";
+import {
+  Table,
+  Model,
+  ForeignKey,
+  BelongsTo,
+  Column,
+} from "sequelize-typescript";
 import User from "./user";
 
-@Table({ timestamps: true, tableName: "role", freezeTableName: true })
+@Table({ timestamps: true, tableName: "follow", freezeTableName: true })
 export default class Follow extends Model {
-  @HasOne(() => User)
-  user: User;
-
+  @ForeignKey(() => User)
   @Column
   userId: number;
 
-  @HasOne(() => User)
-  follow: User;
-
+  @ForeignKey(() => User)
   @Column
   followId: number;
+
+  @BelongsTo(() => User)
+  user: User;
 }

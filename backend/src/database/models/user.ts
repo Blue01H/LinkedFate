@@ -1,51 +1,65 @@
 import hasha from "hasha";
 import Role from "./role";
-import { Table, Column, Model, HasMany, ForeignKey, Unique,  BelongsTo } from "sequelize-typescript";
+import {
+  Table,
+  Column,
+  Model,
+  HasMany,
+  ForeignKey,
+  Unique,
+  BelongsTo,
+} from "sequelize-typescript";
+import Follow from "./follow";
+import Post from "./post";
 
-@Table({timestamps: true, tableName: "user", freezeTableName: true})
-export default class User extends Model{
+@Table({ timestamps: true, tableName: "user", freezeTableName: true })
+export default class User extends Model {
+  @Unique
+  @Column
+  email: string;
 
-    @Unique
-    @Column
-    email: string
+  @Column
+  names: string;
 
-    @Column
-    names: string
+  @Column
+  surnames: string;
 
-    @Column
-    surnames: string
+  @Column
+  phone: string;
 
-    @Column
-    phone: string
+  @ForeignKey(() => Role)
+  @Column
+  rolId: number;
 
-    @ForeignKey(() => Role)
-    @Column
-    rolId: number
+  @BelongsTo(() => Role)
+  role: Role;
 
-    @BelongsTo(() => Role)
-    role: Role
+  @HasMany(() => Follow)
+  follow: Follow[];
 
-    @Column
-    get password(): string{
-        return this.getDataValue("password");
+  @HasMany(() => Post)
+  post: Post[];
+
+  @Column
+  get password(): string {
+    return this.getDataValue("password");
+  }
+
+  set password(password: string) {
+    this.setDataValue("password", hasha(password));
+  }
+
+  async getRole(): Promise<string> {
+    if (this.rolId) {
+      const role = await Role.findOne({ where: { id: this.rolId } });
+      return role.name;
+    } else return null;
+  }
+
+  async setRole(name: string) {
+    if (!this.role || (this.role && this.role.name !== name)) {
+      const target: Role = await Role.findOne({ where: { name: name } });
+      await this.update({ rolId: target.id });
     }
-
-    set password(password: string){
-        this.setDataValue("password", hasha(password))
-    }
-
-    async getRole(): Promise<string>{
-        if(this.rolId){
-            const role = await Role.findOne({ where: { id: this.rolId } });
-            return role.name;
-        }else return null;
-    }
-
-    async setRole(name: string){
-        if(!this.role || (this.role && (this.role.name !== name))){
-            const target: Role = await Role.findOne({ where: { name: name } });
-            await this.update({rolId: target.id});
-        }
-    }
-
+  }
 }

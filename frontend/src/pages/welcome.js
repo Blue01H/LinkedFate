@@ -1,14 +1,31 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import Slider from "./utility/Slider";
+import Welcome1 from "../img/welcome_1.jpeg";
+import Welcome2 from "../img/welcome_2.jpeg";
+import Welcome3 from "../img/welcome_3.jpeg";
+import { getData, getToken } from "../controllers/user";
 
-const images = [
-  "https://github.com/Blue01H/LinkedFate/blob/main/src/img/IMG%201.jpeg?raw=true",
-  "https://github.com/Blue01H/LinkedFate/blob/main/src/img/IMG%202.jpeg?raw=true",
-  "https://github.com/Blue01H/LinkedFate/blob/main/src/img/MG%203.jpeg?raw=true",
-];
+const images = [Welcome1, Welcome2, Welcome3];
 
 function Welcome({ navigation }) {
+  async function load() {
+    const token = await getToken();
+    if (token) {
+      try {
+        const data = await getData(token);
+        console.log(data);
+        navigation.navigate("dashboard");
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    console.log(token);
+  }
+
+  useEffect(() => {
+    load();
+  }, []);
   return (
     <View style={styles.container}>
       <View style={styles.logoSpace}>

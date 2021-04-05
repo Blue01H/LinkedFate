@@ -2,7 +2,7 @@ import database from "../database";
 
 const { Post, User, Role } = database.models;
 
-async function createPost(userId: number, content: Text) {
+async function createPost(userId: number, content: string) {
   return await Post.create({ userId: userId, content: content });
 }
 

@@ -8,7 +8,9 @@ import {
   ActivityIndicator,
 } from "react-native";
 
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { RadioButton } from "react-native-paper";
+import config from "../config";
+import { setToken } from "../controllers/user";
 
 function Register({ navigation }) {
   const [email, setEmail] = useState("");
@@ -17,6 +19,7 @@ function Register({ navigation }) {
   const [surnames, setSurnames] = useState("");
   const [confirm, setConfirm] = useState("");
   const [phone, setPhone] = useState("");
+  const [role, setRole] = useState("employee");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -26,7 +29,7 @@ function Register({ navigation }) {
       if (password !== confirm) {
         throw new Error("Password mismatch.");
       }
-      const response = await fetch("http://localhost:3000/user", {
+      const response = await fetch(`${config.API_URL}/user`, {
         method: "POST",
         body: JSON.stringify({
           email: email,
@@ -34,6 +37,7 @@ function Register({ navigation }) {
           names: names,
           surnames: surnames,
           phone: phone,
+          role: role,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -41,7 +45,7 @@ function Register({ navigation }) {
       });
       if (response.status == 200) {
         const token = await response.text();
-        await AsyncStorage.setItem("@storage_token", token);
+        await setToken(token);
         navigation.navigate("dashboard");
       } else {
         const text = await response.text();
@@ -56,7 +60,10 @@ function Register({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <View style={styles.logoSpace}>
+      <View
+        style={styles.logoSpace}
+        onTouchStart={() => navigation.navigate("welcome")}
+      >
         <Text style={styles.baseText}>Linked</Text>
         <View style={styles.square}>
           <Text style={styles.logoText}>Fate</Text>
@@ -125,6 +132,29 @@ function Register({ navigation }) {
             style={styles.inputText}
           />
         </View>
+        <View style={{ paddingBottom: 8, paddingLeft: 50, paddingRight: 50 }}>
+          <View>
+            <Text style={{ position: "absolute", left: 50, top: 10 }}>
+              Employee
+            </Text>
+            <RadioButton
+              value="employee"
+              status={role === "employee" ? "checked" : "unchecked"}
+              onPress={() => setRole("employee")}
+            />
+          </View>
+          <View>
+            <Text style={{ position: "absolute", left: 50, top: 10 }}>
+              Business
+            </Text>
+            <RadioButton
+              style={styles.radio}
+              value="business"
+              status={role === "business" ? "checked" : "unchecked"}
+              onPress={() => setRole("business")}
+            />
+          </View>
+        </View>
       </View>
 
       <View style={styles.btnSpace}>
@@ -141,6 +171,13 @@ function Register({ navigation }) {
 export default Register;
 
 const styles = StyleSheet.create({
+  radio: {
+    backgroundColor: "#000000",
+    color: "#000000",
+    left: "10%",
+    position: "relative",
+    width: "80%",
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
