@@ -9,21 +9,12 @@ import Login from "./src/pages/Login";
 import Register from "./src/pages/Register";
 import Dashboard from "./src/pages/Dashboard";
 
-import { getToken } from "./src/controllers/user";
+import { useAuth } from "./src/controllers/user";
 
 const Stack = createStackNavigator();
 
 export default function App() {
-  const [token, setToken] = useState(null);
-  const [isLoaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    getToken()
-      .then((token) => {
-        if (token) setToken(token);
-      })
-      .finally(() => setLoaded(true));
-  }, []);
+  const status = useAuth();
 
   const protectedStack = (
     <>
@@ -35,8 +26,7 @@ export default function App() {
     </>
   );
 
-  const isLoggedIn = isLoaded && token;
-  if (!isLoaded) {
+  if (status.current === "request") {
     return <ActivityIndicator animating={true} />;
   }
   return (
@@ -57,7 +47,7 @@ export default function App() {
           component={Register}
           options={{ headerShown: false }}
         />
-        {isLoggedIn && protectedStack}
+        {status.current === "logged" && protectedStack}
       </Stack.Navigator>
     </NavigationContainer>
   );

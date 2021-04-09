@@ -7,49 +7,26 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
-import config from "../config";
 
-import { setToken } from "../controllers/user";
+import { login } from "../controllers/user";
+import useAsync from "../helpers/process";
 
 function Login({ navigation }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [loginProcess, setLogin] = useAsync();
 
   async function signIn() {
-    const jsonSignIn = {
-      email: email,
-      password: password,
-    };
-    setLoading(true);
-    try {
-      const response = await fetch(`${config.API_URL}/login`, {
-        method: "POST",
-        body: JSON.stringify(jsonSignIn),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (response.status == 200) {
-        const token = await response.text();
-        await setToken(token);
-        navigation.navigate("dashboard");
-      } else {
-        const text = await response.text();
-        throw new Error(text);
-      }
-    } catch (e) {
-      setError(e);
-    } finally {
-      setLoading(false);
-    }
+    setLogin(async () => {
+      await login(email, password);
+      navigation.navigate("dashboard");
+    });
   }
   return (
     <View style={styles.container}>
       <View
         style={styles.logoSpace}
-        onTouchStart={() => navigation.navigate("welcome")}
+        onPress={() => navigation.navigate("welcome")}
       >
         <Text style={styles.baseText}>Linked</Text>
         <View style={styles.square}>
@@ -61,10 +38,10 @@ function Login({ navigation }) {
         <Text style={styles.signInText}>Sign in</Text>
       </View>
 
-      {error && (
+      {loginProcess.error && (
         <View style={styles.btnSpace}>
           <View style={styles.flashError}>
-            <Text style={styles.flashText}>{error.message}</Text>
+            <Text style={styles.flashText}>{loginProcess.error.message}</Text>
           </View>
         </View>
       )}
@@ -91,12 +68,12 @@ function Login({ navigation }) {
       </View>
 
       <View style={styles.btnSpace}>
-        {!loading && (
+        {!loginProcess.isLoading && (
           <TouchableOpacity style={styles.loginBtn} onPress={() => signIn()}>
             <Text style={styles.logoText}>Continue</Text>
           </TouchableOpacity>
         )}
-        {loading && <ActivityIndicator animating={true} />}
+        {loginProcess.isLoading && <ActivityIndicator animating={true} />}
       </View>
     </View>
   );

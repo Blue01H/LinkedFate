@@ -11,31 +11,31 @@ async function deletePost(userId: number, postId: number) {
 }
 
 async function getPosts(userId: number, page: number, limit: number) {
-  const companyRol = await Role.findOne({ where: { name: "company" } });
+  const companyRol = await Role.findOne({ where: { name: "business" } });
   const employeeRol = await Role.findOne({ where: { name: "employee" } });
   if (companyRol && employeeRol) {
     const companyRolId = companyRol.id;
     const employeeRolId = employeeRol.id;
     const user = await User.findOne({ where: { id: userId } });
-    if (user.role == employeeRolId) {
+    if (user.rolId == employeeRolId) {
       const offset = page * limit;
-      return await User.findAndCountAll({
+      return await Post.findAndCountAll({
         offset: offset,
         limit: limit,
         include: { model: User, where: { rolId: companyRolId } },
         order: [["id", "DESC"]],
       });
-    } else if (user.role == companyRolId) {
+    } else if (user.rolId == companyRolId) {
       const offset = page * limit;
-      return await User.findAndCountAll({
+      return await Post.findAndCountAll({
         offset: offset,
         limit: limit,
         include: { model: User, where: { rolId: employeeRolId } },
         order: [["id", "DESC"]],
       });
     }
-    throw "User isn't employee or compane";
-  } else throw "No company rol or employee rol";
+    throw new Error("User isn't employee or business");
+  } else throw new Error("No business rol or employee rol");
 }
 
 export { deletePost, getPosts, createPost };

@@ -3,19 +3,14 @@ import {
   StyleSheet,
   Text,
   View,
-  TouchableOpacity,
-  Image,
   TextInput,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { Button } from "react-native-paper";
-import config from "../config";
-import {
-  deleteToken,
-  getData,
-  getHeaders,
-  getToken,
-} from "../controllers/user";
+import { create, get } from "../controllers/post";
+import { logout, useAuth } from "../controllers/user";
+import useAsync from "../helpers/process";
 
 const UselessTextInput = (props) => {
   return (
@@ -27,51 +22,75 @@ const UselessTextInput = (props) => {
   );
 };
 
+const isCloseToBottom = ({ layoutMeasurement, contentOffset, contentSize }) => {
+  const paddingToBottom = 20;
+  return (
+    layoutMeasurement.height + contentOffset.y >=
+    contentSize.height - paddingToBottom
+  );
+};
+
 function Dashboard({ navigation }) {
-  const [user, setUser] = useState(null);
   const [post, newPost] = useState("");
-  const [publishLoading, setPublishLoading] = useState(false);
-  const [publishError, setPublishError] = useState(null);
+  const [user, setUser] = useState(null);
+
+  const status = useAuth();
+  const [publishProcess, setPublish] = useAsync();
+  const [postProcess, setPost] = useAsync();
+  const [page, setPage] = useState([]);
+  const [actualPage, setActualPage] = useState(-1);
+  const [count, setCount] = useState(0);
 
   async function publish() {
-    setPublishLoading(true);
-    try {
-      const headers = await getHeaders();
-      headers.set("Content-Type", "application/json");
-      const response = await fetch(`${config.API_URL}/post`, {
-        method: "POST",
-        body: JSON.stringify({
-          content: post,
-        }),
-        headers: headers,
-      });
-      if (response.status == 200) {
-        navigation.navigate("dashboard");
-      } else {
-        const text = await response.text();
-        throw new Error(text);
-      }
-    } catch (e) {
-      console.log(e);
-      setPublishError(e);
-    } finally {
-      setPublishLoading(false);
-    }
+    setPublish(async () => {
+      await create(post);
+    });
   }
 
   useEffect(() => {
-    getData()
-      .then((user) => {
-        if (!user) navigation.navigate("welcome");
-        else {
-          setUser(user);
-          console.log(user);
-        }
-      })
-      .catch(() => navigation.navigate("welcome"));
-  }, []);
+    if (actualPage >= 0) {
+      setPost(async () => {
+        const posts = await get(actualPage);
+        return posts;
+      });
+    }
+  }, [actualPage]);
+
+  function next() {
+    if (page.length <= count) setActualPage(actualPage + 1);
+  }
+
+  useEffect(() => {
+    if (page.length == 0 && postProcess.status == "unitialized") {
+      next();
+    }
+    if (
+      postProcess.status == "end" &&
+      !postProcess.error &&
+      postProcess.result
+    ) {
+      const { result } = postProcess;
+      setCount(result.count);
+      const pages = [...page, ...result.rows];
+      setPage(pages);
+    }
+  }, [postProcess]);
+
+  useEffect(() => {
+    if (status.current == "error") navigation.navigate("welcome");
+    else if (status.user && !user) setUser(status.user);
+  }, [status]);
   return (
-    <View style={styles.container}>
+    <ScrollView
+      onScroll={({ nativeEvent }) => {
+        console.log(nativeEvent);
+        if (isCloseToBottom(nativeEvent)) {
+          next();
+        }
+      }}
+      scrollEventThrottle={400}
+      style={styles.container}
+    >
       <View style={styles.logoutContainer}>
         <Button
           style={{
@@ -79,8 +98,8 @@ function Dashboard({ navigation }) {
             color: "#ffffff",
             display: "flex",
           }}
-          onTouchStart={() => {
-            deleteToken().finally(() => {
+          onPress={() => {
+            logout().finally(() => {
               navigation.navigate("welcome");
             });
           }}
@@ -104,21 +123,21 @@ function Dashboard({ navigation }) {
             width: 100,
             marginLeft: 5,
           }}
-          onTouchStart={() => {}}
+          onPress={() => {}}
         >
           <Text style={{ color: "#fff" }}>Search</Text>
         </Button>
       </View>
 
       <View style={styles.square}>
-        <View style={{ position: "relative", flexDirection: "row" }}>
+        <View style={{ position: "relative" }}>
           <View
             style={{
               backgroundColor: "#fff",
               borderBottomColor: "#000000",
-              borderBottomWidth: 1,
-              padding: 10,
-              margin: 10,
+              borderBottomWidth: "1%",
+              padding: "5%",
+              margin: "5%",
               width: "90%",
             }}
           >
@@ -138,10 +157,9 @@ function Dashboard({ navigation }) {
               style={{
                 position: "relative",
                 display: "block",
-                flexDirection: "row",
-
-                top: "100%",
-                left: "-90%",
+                width: "30%",
+                marginLeft: "5%",
+                marginBottom: "5%",
               }}
             >
               <Button
@@ -149,17 +167,17 @@ function Dashboard({ navigation }) {
                   backgroundColor: "#2867B2",
                   color: "#ffffff",
                 }}
-                onTouchStart={() => {
-                  if (!publishLoading) {
+                onPress={() => {
+                  if (!publishProcess.isLoading) {
                     publish();
                   }
                 }}
               >
                 <Text style={{ color: "#fff" }}>
-                  {publishLoading
+                  {publishProcess.isLoading
                     ? "Loading..."
-                    : publishError
-                    ? "Error!"
+                    : publishProcess.error
+                    ? `Error! ${publishProcess.error.message}`
                     : "Publish"}
                 </Text>
               </Button>
@@ -167,7 +185,64 @@ function Dashboard({ navigation }) {
           )}
         </View>
       </View>
-    </View>
+      {postProcess.isLoading && <ActivityIndicator animating={true} />}
+      {!postProcess.isLoading &&
+        page.map((page) => (
+          <View style={styles.square} key={`page-${page.id}`}>
+            <View style={{ position: "relative" }}>
+              <View
+                style={{
+                  position: "relative",
+                  width: "100%",
+                  textAlign: "center",
+                  padding: "2%",
+                  display: "block",
+                }}
+              >
+                <Text style={{ display: "block" }}>
+                  {user && user.role && user.role == "employee"
+                    ? "New job offer!"
+                    : "Possible employee for your job!"}
+                </Text>
+                <Text style={{ display: "block" }}>
+                  From: {`${page.user.names} ${page.user.surnames}`}
+                </Text>
+              </View>
+              <View
+                style={{
+                  position: "relative",
+                  width: "96%",
+                  textAlign: "justify",
+                  padding: "2%",
+                  margin: "2%",
+                  display: "block",
+                  backgroundColor: "#fff",
+                }}
+              >
+                <Text>{page.content}</Text>
+              </View>
+              <View
+                style={{
+                  position: "relative",
+                  width: "30%",
+                  marginLeft: "5%",
+                  marginBottom: "5%",
+                }}
+              >
+                <Button
+                  style={{
+                    backgroundColor: "#2867B2",
+                    color: "#ffffff",
+                  }}
+                  onTouchStart={() => {}}
+                >
+                  <Text style={{ color: "#fff" }}>Send Email</Text>
+                </Button>
+              </View>
+            </View>
+          </View>
+        ))}
+    </ScrollView>
   );
 }
 export default Dashboard;

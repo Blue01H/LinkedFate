@@ -9,8 +9,8 @@ import {
 } from "react-native";
 
 import { RadioButton } from "react-native-paper";
-import config from "../config";
-import { setToken } from "../controllers/user";
+import { register } from "../controllers/user";
+import useAsync from "../helpers/process";
 
 function Register({ navigation }) {
   const [email, setEmail] = useState("");
@@ -20,42 +20,15 @@ function Register({ navigation }) {
   const [confirm, setConfirm] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState("employee");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  async function register() {
-    setLoading(true);
-    try {
-      if (password !== confirm) {
-        throw new Error("Password mismatch.");
-      }
-      const response = await fetch(`${config.API_URL}/user`, {
-        method: "POST",
-        body: JSON.stringify({
-          email: email,
-          password: password,
-          names: names,
-          surnames: surnames,
-          phone: phone,
-          role: role,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (response.status == 200) {
-        const token = await response.text();
-        await setToken(token);
-        navigation.navigate("dashboard");
-      } else {
-        const text = await response.text();
-        throw new Error(text);
-      }
-    } catch (e) {
-      setError(e);
-    } finally {
-      setLoading(false);
-    }
+  const [registerProcess, setRegister] = useAsync();
+
+  async function signUp() {
+    setRegister(async () => {
+      if (password !== confirm) throw new Error("Password mismatch.");
+      await register(email, password, names, surnames, phone, role);
+      navigation.navigate("dashboard");
+    });
   }
 
   return (
@@ -74,10 +47,12 @@ function Register({ navigation }) {
         <Text style={styles.signInText}>Register</Text>
       </View>
 
-      {error && (
+      {registerProcess.error && (
         <View style={styles.btnSpace}>
           <View style={styles.flashError}>
-            <Text style={styles.flashText}>{error.message}</Text>
+            <Text style={styles.flashText}>
+              {registerProcess.error.message}
+            </Text>
           </View>
         </View>
       )}
@@ -158,12 +133,12 @@ function Register({ navigation }) {
       </View>
 
       <View style={styles.btnSpace}>
-        {!loading && (
-          <TouchableOpacity style={styles.loginBtn} onPress={() => register()}>
+        {!registerProcess.isLoading && (
+          <TouchableOpacity style={styles.loginBtn} onPress={() => signUp()}>
             <Text style={styles.logoText}>Register</Text>
           </TouchableOpacity>
         )}
-        {loading && <ActivityIndicator animating={true} />}
+        {registerProcess.isLoading && <ActivityIndicator animating={true} />}
       </View>
     </View>
   );
