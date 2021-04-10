@@ -8,6 +8,7 @@ import Welcome from "./src/pages/welcome";
 import Login from "./src/pages/Login";
 import Register from "./src/pages/Register";
 import Dashboard from "./src/pages/Dashboard";
+import UserFile from "./src/pages/UserFile"
 
 import { useAuth } from "./src/controllers/user";
 
