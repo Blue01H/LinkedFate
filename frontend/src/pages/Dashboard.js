@@ -92,20 +92,30 @@ function Dashboard({ navigation }) {
       style={styles.container}
     >
       <View style={styles.logoutContainer}>
-        <Button
-          style={{
-            backgroundColor: "#2867B2",
-            color: "#ffffff",
-            display: "flex",
-          }}
-          onPress={() => {
-            logout().finally(() => {
-              navigation.navigate("welcome");
-            });
-          }}
-        >
-          <Text style={{ color: "#fff" }}>Logout</Text>
-        </Button>
+          <View style={styles.logoSpace}>
+            <Text style={styles.baseText}>Linked</Text>
+            <View style={styles.logoSquare}>
+              <Text style={styles.logoText}>Fate</Text>
+            </View>
+          </View>
+          <View>
+          <Button
+            style={{
+              backgroundColor: "#2867B2",
+              color: "#fff",
+              marginTop: 30,
+              marginLeft: 110,
+              borderRadius:5,
+            }}
+            onPress={() => {
+              logout().finally(() => {
+                navigation.navigate("welcome");
+              });
+            }}
+          >
+            <Text style={styles.logoutText}>Logout</Text>
+          </Button>
+          </View>
       </View>
       <View style={styles.avatarContainer}>
         <View style={{ paddingLeft: 5 }}>
@@ -118,12 +128,12 @@ function Dashboard({ navigation }) {
         <Button
           style={{
             backgroundColor: "#2867B2",
-            color: "#ffffff",
+            color: "#fff",
             display: "inline",
             width: 100,
             marginLeft: 5,
           }}
-          onPress={() => {}}
+          onPress={() => { }}
         >
           <Text style={{ color: "#fff" }}>Search</Text>
         </Button>
@@ -139,6 +149,7 @@ function Dashboard({ navigation }) {
               padding: "5%",
               margin: "5%",
               width: "90%",
+              borderColor: '#fff'
             }}
           >
             <UselessTextInput
@@ -150,9 +161,9 @@ function Dashboard({ navigation }) {
                   ? "Post for a new job..."
                   : "Post new job request of your business"
               }
+              style={{borderRadius: 5}}
             />
           </View>
-          {post !== "" && (
             <View
               style={{
                 position: "relative",
@@ -166,6 +177,8 @@ function Dashboard({ navigation }) {
                 style={{
                   backgroundColor: "#2867B2",
                   color: "#ffffff",
+                  width: 100,
+                  marginLeft: 180,
                 }}
                 onPress={() => {
                   if (!publishProcess.isLoading) {
@@ -177,12 +190,12 @@ function Dashboard({ navigation }) {
                   {publishProcess.isLoading
                     ? "Loading..."
                     : publishProcess.error
-                    ? `Error! ${publishProcess.error.message}`
-                    : "Publish"}
+                      ? `Error! ${publishProcess.error.message}`
+                      : "Publish"}
                 </Text>
               </Button>
             </View>
-          )}
+
         </View>
       </View>
       {postProcess.isLoading && <ActivityIndicator animating={true} />}
@@ -199,12 +212,12 @@ function Dashboard({ navigation }) {
                   display: "block",
                 }}
               >
-                <Text style={{ display: "block" }}>
+                <Text style={{ paddingTop: 5, fontFamily: "sans-serif",display: "block" }}>
                   {user && user.role && user.role == "employee"
                     ? "New job offer!"
                     : "Possible employee for your job!"}
                 </Text>
-                <Text style={{ display: "block" }}>
+                <Text style={{ fontFamily: "sans-serif", display: "block" }}>
                   From: {`${page.user.names} ${page.user.surnames}`}
                 </Text>
               </View>
@@ -219,7 +232,7 @@ function Dashboard({ navigation }) {
                   backgroundColor: "#fff",
                 }}
               >
-                <Text>{page.content}</Text>
+                <Text style={{fontFamily: "sans-serif"}}>{page.content}</Text>
               </View>
               <View
                 style={{
@@ -233,10 +246,12 @@ function Dashboard({ navigation }) {
                   style={{
                     backgroundColor: "#2867B2",
                     color: "#ffffff",
+                    width: 160,
+                    paddingTop: 8,
                   }}
-                  onTouchStart={() => {}}
+                  onTouchStart={() => { }}
                 >
-                  <Text style={{ color: "#fff" }}>Send Email</Text>
+                  <Text style={{ fontFamily: "sans-serif", color: "#fff" }}>Send Email</Text>
                 </Button>
               </View>
             </View>
@@ -270,10 +285,12 @@ const styles = StyleSheet.create({
     backgroundColor: "#f0f0f0",
     borderRadius: 8,
     height: 45,
-    width: 200,
+    width: 223,
     color: "#000",
     paddingLeft: 18,
     display: "inline",
+    borderColor: '#fff',
+    borderWidth: 1,
   },
   square: {
     width: 47,
@@ -296,8 +313,39 @@ const styles = StyleSheet.create({
     marginLeft: 15,
   },
   logoutContainer: {
-    margin: 10,
-    width: 100,
+    marginLeft: 10,
+    width: 60,
+    flexDirection: "row",
   },
   usernameText: {},
+  logoSpace: {
+    marginTop: 35,
+    flexDirection: "row",
+    paddingLeft: 10,
+  },
+  logoSquare: {
+    width: 47,
+    height: 24,
+    backgroundColor: "#2867B2",
+    borderRadius: 5,
+    paddingLeft: 3,
+  },
+  logoText: {
+    fontFamily: "sans-serif",
+    fontSize: 20,
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  baseText: {
+    fontFamily: "sans-serif",
+    fontSize: 20,
+    color: "#2867B2",
+    fontWeight: "bold",
+  },
+  logoutText: {
+    fontFamily: "sans-serif",
+    fontSize: 15,
+    color: "#fff",
+    fontWeight: "bold",
+  },
 });
