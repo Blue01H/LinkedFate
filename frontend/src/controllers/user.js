@@ -3,6 +3,14 @@ import { useEffect, useState } from "react";
 import config from "../config";
 import { cancelable } from "cancelable-promise";
 
+const authListeners = [];
+
+function emitAuthChanged() {
+  for (const listener of authListeners) {
+    if (typeof listener === "function") listener();
+  }
+}
+
 async function getToken() {
   const token = await AsyncStorage.getItem("@storage_token");
   return token;
@@ -67,6 +75,7 @@ async function getData() {
 async function logout() {
   await AsyncStorage.removeItem("@storage_token");
   await AsyncStorage.removeItem("@storage_user");
+  emitAuthChanged();
 }
 
 async function isLogged() {
@@ -91,8 +100,34 @@ async function login(email, password) {
     const token = await response.text();
     await setToken(token);
     const data = await getData();
+    emitAuthChanged();
     return data;
   } else {
+    const text = await response.text();
+    throw new Error(text);
+  }
+}
+
+async function sendCode(email) {
+  const response = await fetch(`${config.API_URL}/confirm?email=${email}`);
+  if (response.status !== 200) {
+    const text = await response.text();
+    throw new Error(text);
+  }
+}
+
+async function verify(email, code) {
+  const response = await fetch(`${config.API_URL}/confirm`, {
+    method: "POST",
+    body: JSON.stringify({
+      email: email,
+      code: code,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  if (response.status !== 200) {
     const text = await response.text();
     throw new Error(text);
   }
@@ -113,15 +148,37 @@ async function register(email, password, names, surnames, phone, role) {
       "Content-Type": "application/json",
     },
   });
-  if (response.status == 200) {
-    const token = await response.text();
-    await setToken(token);
-    const data = await getData();
-    return data;
-  } else {
+  if (response.status !== 200) {
     const text = await response.text();
     throw new Error(text);
   }
+}
+
+async function searchUsers(content) {
+  const headers = await getHeaders();
+  const response = await fetch(
+    `${config.API_URL}/user/search?search=${content}`,
+    { headers: headers }
+  );
+  if (response.status !== 200) {
+    const text = await response.text();
+    throw new Error(text);
+  }
+  const users = await response.json();
+  return users;
+}
+
+async function getById(id) {
+  const headers = await getHeaders();
+  const response = await fetch(`${config.API_URL}/user/search?id=${id}`, {
+    headers: headers,
+  });
+  if (response.status !== 200) {
+    const text = await response.text();
+    throw new Error(text);
+  }
+  const users = await response.json();
+  return users;
 }
 
 /**
@@ -136,23 +193,38 @@ function useAuth() {
   });
 
   useEffect(() => {
-    if (status.current == "request") {
-      const promise = cancelable(getData());
-      promise
-        .then((user) => {
-          setStatus({
-            ...status,
-            current: "logged",
-            user: user,
-          });
-        })
-        .catch((err) => {
-          setStatus({
-            ...status,
-            current: "error",
-            error: err,
-          });
+    let promise;
+    authListeners.push(() => {
+      promise = updateStatus();
+    });
+    return () => {
+      if (promise) promise.cancel();
+    };
+  }, []);
+
+  function updateStatus() {
+    const promise = cancelable(getData());
+    promise
+      .then((user) => {
+        setStatus({
+          ...status,
+          current: "logged",
+          user: user,
         });
+      })
+      .catch((err) => {
+        setStatus({
+          ...status,
+          current: "error",
+          error: err,
+        });
+      });
+    return promise;
+  }
+
+  useEffect(() => {
+    if (status.current == "request") {
+      const promise = updateStatus();
 
       return () => {
         promise.cancel();
@@ -173,6 +245,10 @@ export default {
   register,
   isLogged,
   useAuth,
+  sendCode,
+  verify,
+  getById,
+  searchUsers,
 };
 export {
   getToken,
@@ -183,4 +259,8 @@ export {
   register,
   isLogged,
   useAuth,
+  sendCode,
+  verify,
+  getById,
+  searchUsers,
 };

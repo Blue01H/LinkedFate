@@ -19,10 +19,12 @@ async function create(content) {
   }
 }
 
-async function get(page = 1, limit = 5) {
+async function get(page = 1, limit = 5, byUser = undefined) {
   const headers = await getHeaders();
   const response = await fetch(
-    `${config.API_URL}/post?page=${page}&limit=${limit}`,
+    `${config.API_URL}/post?page=${page}&limit=${limit}${
+      byUser ? `&userId=${byUser}` : ``
+    }`,
     {
       headers: headers,
     }
@@ -36,6 +38,17 @@ async function get(page = 1, limit = 5) {
   }
 }
 
-export { create, get };
+async function request(id) {
+  const headers = await getHeaders();
+  const response = await fetch(`${config.API_URL}/request?id=${id}`, {
+    headers: headers,
+  });
+  if (response.status !== 200) {
+    const text = await response.text();
+    throw new Error(text);
+  }
+}
 
-export default { create, get };
+export { create, get, request };
+
+export default { create, get, request };

@@ -4,6 +4,7 @@ import express, { Request } from "express";
 import User from "../controllers/user";
 import Post from "../helpers/post";
 import Follow from "../helpers/follow";
+import { sendJobRequest, sendWorkRequest } from "../controllers/mail";
 
 const router = express.Router();
 
@@ -12,7 +13,7 @@ const auth = passport.authenticate("jwt", { session: false });
 interface UserRequest extends Request {
   user: {
     id: number;
-    username: string;
+    email: string;
     role: string;
     createdAt: string;
     updatedAt: string;
@@ -23,6 +24,47 @@ router.post("/login", async (req, res) => {
   try {
     const token = await User.login(req.body);
     res.status(200).send(token);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
+router.post("/confirm", async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    if (!email || !code) throw new Error("No email and code");
+    const user = await User.getByEmail(email as string);
+    await User.verifyCode(user, code as string);
+    res.sendStatus(200);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
+router.get("/confirm", async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) throw new Error("No email");
+    const user = await User.getByEmail(email as string);
+    await User.confirmCode(user);
+    res.sendStatus(200);
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
+router.get("/request", auth, async (req: UserRequest, res) => {
+  try {
+    const { id } = req.query;
+    const from = await User.getById(req.user.id);
+    const to = await User.getById(parseInt(id as string));
+    const role = await from.getRole();
+    if (role === "employee") {
+      await sendWorkRequest(from, to);
+    } else {
+      await sendJobRequest(from, to);
+    }
+    res.sendStatus(200);
   } catch (e) {
     res.status(500).send(e.message);
   }
@@ -41,14 +83,30 @@ router.get("/user/all", auth, async (req: UserRequest, res) => {
   }
 });
 
+router.get("/user/search", auth, async (req: UserRequest, res) => {
+  try {
+    const { search, id } = req.query;
+    if (search) {
+      const users = await User.find(search as string);
+      res.status(200).send(users);
+    }
+    if (id) {
+      const user = await User.getById(parseInt(id as string));
+      res.status(200).send(user);
+    }
+  } catch (e) {
+    res.status(500).send(e.message);
+  }
+});
+
 router.post("/user", async (req, res) => {
   try {
     const { role } = req.body;
     if (role) {
       delete req.body.role;
     }
-    const token = await User.register(req.body, role);
-    res.status(200).send(token);
+    await User.register(req.body, role);
+    res.sendStatus(200);
   } catch (e) {
     res.status(500).send(e.message);
   }
@@ -93,11 +151,31 @@ router.post("/post", auth, async (req: UserRequest, res) => {
 
 router.get("/post", auth, async (req: UserRequest, res) => {
   try {
-    const limit = parseInt((req.query.limit || "5") as string);
-    const page = parseInt((req.query.page || "1") as string);
-    const posts = await Post.getPosts(req.user.id, page, limit);
-    res.status(200).send(posts);
+    const getNumber = (param: unknown, def: string = "") => {
+      const number =
+        def === ""
+          ? parseInt(param as string)
+          : parseInt((param || def) as string);
+      return number;
+    };
+    const { limit, page, userId } = req.query;
+    if (userId) {
+      const posts = await Post.getPostsByUser(
+        getNumber(page, "0"),
+        getNumber(limit, "5"),
+        getNumber(userId)
+      );
+      res.status(200).send(posts);
+    } else {
+      const posts = await Post.getPosts(
+        req.user.id,
+        getNumber(page, "0"),
+        getNumber(limit, "5")
+      );
+      res.status(200).send(posts);
+    }
   } catch (e) {
+    console.log(e);
     res.status(500).send(e.message);
   }
 });

@@ -8,9 +8,11 @@ import Welcome from "./src/pages/welcome";
 import Login from "./src/pages/Login";
 import Register from "./src/pages/Register";
 import Dashboard from "./src/pages/Dashboard";
-import UserFile from "./src/pages/UserFile"
+import UserFile from "./src/pages/UserFile";
 
 import { useAuth } from "./src/controllers/user";
+import Confirm from "./src/pages/Confirm";
+import Search from "./src/pages/Search";
 
 const Stack = createStackNavigator();
 
@@ -23,6 +25,18 @@ export default function App() {
         name="dashboard"
         component={Dashboard}
         options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="profile"
+        component={UserFile}
+        options={{ headerShown: false }}
+        initialParams={{ id: undefined }}
+      />
+      <Stack.Screen
+        name="search"
+        component={Search}
+        options={{ headerShown: false }}
+        initialParams={{ search: "" }}
       />
     </>
   );
@@ -47,6 +61,12 @@ export default function App() {
           name="register"
           component={Register}
           options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="confirm"
+          component={Confirm}
+          options={{ headerShown: false }}
+          initialParams={{ email: undefined }}
         />
         {status.current === "logged" && protectedStack}
       </Stack.Navigator>

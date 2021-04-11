@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -8,105 +8,84 @@ import {
   ActivityIndicator,
   Button,
 } from "react-native";
-import { RadioButton } from "react-native-paper";
+import Posts from "../components/Post";
+import { get } from "../controllers/post";
+import { getById, useAuth } from "../controllers/user";
+import useAsync from "../helpers/process";
 
+function UserFile({ route, navigation }) {
+  const { id } = route.params;
+  const [data, setData] = useState(null);
+  const auth = useAuth();
 
-function UserFile({ navigation }) {
+  useEffect(() => {
+    if (!id && auth.current === "logged") {
+      setData(auth.user);
+    }
+  }, [auth]);
+
+  useEffect(() => {
+    if (id) {
+      getById(id)
+        .then((user) => {
+          setData(user);
+        })
+        .catch((error) => console.error(error));
+    }
+  }, []);
+
   return (
     <View style={styles.container}>
       <View
         style={styles.logoSpace}
-        onTouchStart={() => navigation.navigate("welcome")}
+        onPress={() => navigation.navigate("dashboard")}
       >
         <View>
-
           <View style={{ flexDirection: "row" }}>
-            <Text style={styles.baseText}>Linked</Text>
+            <Text
+              style={styles.baseText}
+              onPress={() => navigation.navigate("dashboard")}
+            >
+              Linked
+            </Text>
             <View style={styles.square}>
-              <Text style={styles.logoText}>Fate</Text>
+              <Text
+                style={styles.logoText}
+                onPress={() => navigation.navigate("dashboard")}
+              >
+                Fate
+              </Text>
             </View>
           </View>
+          {!data && <ActivityIndicator animating />}
+          {data && (
+            <>
+              <View
+                style={{
+                  flexDirection: "row",
+                }}
+              >
+                <View style={styles.circle}></View>
 
-          <View style={{flexDirection: "row"}}>
-          
-          <View style={styles.circle}>
-          </View>
-
-        <View style={{flexDirection: "column"}}>
-          <Text style={styles.usernameText}>Username</Text>
-          <Text style={styles.workText}>Work Info</Text>
+                <View style={{ flexDirection: "column" }}>
+                  <Text style={styles.usernameText}>
+                    {data.role == "employee"
+                      ? `${data.names} ${data.surnames}`
+                      : data.names}
+                  </Text>
+                  <Text style={styles.workText}>{data.role}</Text>
+                </View>
+              </View>
+              <Text style={styles.usernameText}>
+                {data.role == "employee"
+                  ? "Job Applications"
+                  : "Available jobs"}
+              </Text>
+              <Posts user={data} byUser={id || data.id} />
+            </>
+          )}
         </View>
-
-          </View>
-
-        <View style={{  
-          width: 340,
-          height: 95,
-          borderRadius: 5,
-          marginTop: 10,
-          backgroundColor: "#cdcdcd",}}>
-
-            <Text style={{paddingTop: 8, paddingLeft: 10, fontWeight: "bold"}}>Education:</Text>
-
-            <View style={{width: 320, height: 50, backgroundColor: '#fff', marginTop: 8, marginLeft: 10, borderRadius: 5}}>
-              <Text style={{paddingTop: 5, paddingLeft: 5, fontWeight: "bold"}}>University Better than URU</Text>
-              <Text style={{paddingLeft: 10}}>Duration</Text>
-            </View>
-
-        </View>
-
-        <View style={{  
-          width: 340,
-          height: 150,
-          borderRadius: 5,
-          marginTop: 10,
-          backgroundColor: "#cdcdcd",}}>
-
-            <Text style={{paddingTop: 8, paddingLeft: 10, fontWeight: "bold"}}>Experience:</Text>
-
-            <View style={{width: 320, height: 50, backgroundColor: '#fff', marginTop: 8, marginLeft: 10, borderRadius: 5}}>
-              <Text style={{paddingTop: 5, paddingLeft: 5, fontWeight: "bold"}}>Workplace #1</Text>
-              <Text style={{paddingLeft: 10}}>Duration</Text>
-            </View>
-
-            <View style={{width: 320, height: 50, backgroundColor: '#fff', marginTop: 8, marginLeft: 10, borderRadius: 5}}>
-              <Text style={{paddingTop: 5, paddingLeft: 5, fontWeight: "bold"}}>Workplace #2</Text>
-              <Text style={{paddingLeft: 10}}>Duration</Text>
-            </View>
-
-        </View>
-
-        <View style={{  
-          width: 340,
-          height: 210,
-          borderRadius: 5,
-          marginTop: 10,
-          backgroundColor: "#cdcdcd",}}>
-
-            <Text style={{paddingTop: 8, paddingLeft: 10, fontWeight: "bold"}}>Awards:</Text>
-
-            <View style={{width: 320, height: 50, backgroundColor: '#fff', marginTop: 8, marginLeft: 10, borderRadius: 5}}>
-              <Text style={{paddingTop: 5, paddingLeft: 5, fontWeight: "bold"}}>Certificated #1</Text>
-              <Text style={{paddingLeft: 10}}>Winning Date</Text>
-            </View>
-
-            <View style={{width: 320, height: 50, backgroundColor: '#fff', marginTop: 8, marginLeft: 10, borderRadius: 5}}>
-              <Text style={{paddingTop: 5, paddingLeft: 5, fontWeight: "bold"}}>Certificated #2</Text>
-              <Text style={{paddingLeft: 10}}>Winning Date</Text>
-            </View>
-
-            <View style={{width: 320, height: 50, backgroundColor: '#fff', marginTop: 8, marginLeft: 10, borderRadius: 5}}>
-              <Text style={{paddingTop: 5, paddingLeft: 5, fontWeight: "bold"}}>Certificated #3</Text>
-              <Text style={{paddingLeft: 10}}>Winning Date</Text>
-            </View>
-
-        </View>
-
-        </View>
-
-
       </View>
-
     </View>
   );
 }
@@ -123,6 +102,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
+    width: "100%",
   },
   baseText: {
     fontFamily: "sans-serif",
@@ -236,11 +216,11 @@ const styles = StyleSheet.create({
     width: 45,
     height: 45,
     borderRadius: 45 / 2,
-    backgroundColor: '#f0f0f0',
-    borderColor: '#000',
+    backgroundColor: "#f0f0f0",
+    borderColor: "#000",
     borderWidth: 1,
     marginTop: 10,
-    marginLeft: 8
+    marginLeft: 8,
   },
   usernameText: {
     paddingTop: 10,
@@ -251,6 +231,5 @@ const styles = StyleSheet.create({
   workText: {
     paddingLeft: 6,
     fontSize: 15,
-  }
-
+  },
 });

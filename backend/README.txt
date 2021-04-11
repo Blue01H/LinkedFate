@@ -6,6 +6,10 @@ Example configuration:
 {
     "secretKey":"XXXX",
     "port":"XXXX",
+    "mail"{
+        "user":"ej@gmail.com",
+        "pass":"123ej",
+    },
     "database":{
         "development": {
             "username": "root",

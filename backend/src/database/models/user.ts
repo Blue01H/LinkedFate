@@ -8,6 +8,7 @@ import {
   ForeignKey,
   Unique,
   BelongsTo,
+  Default,
 } from "sequelize-typescript";
 import Follow from "./follow";
 import Post from "./post";
@@ -26,6 +27,10 @@ export default class User extends Model {
 
   @Column
   phone: string;
+
+  @Default(false)
+  @Column
+  registered: boolean;
 
   @ForeignKey(() => Role)
   @Column

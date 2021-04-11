@@ -9,7 +9,7 @@ import {
 } from "react-native";
 
 import { RadioButton } from "react-native-paper";
-import { register } from "../controllers/user";
+import { register, sendCode } from "../controllers/user";
 import useAsync from "../helpers/process";
 
 function Register({ navigation }) {
@@ -27,7 +27,8 @@ function Register({ navigation }) {
     setRegister(async () => {
       if (password !== confirm) throw new Error("Password mismatch.");
       await register(email, password, names, surnames, phone, role);
-      navigation.navigate("dashboard");
+      await sendCode(email);
+      navigation.navigate("confirm", { email: email });
     });
   }
 
@@ -57,22 +58,38 @@ function Register({ navigation }) {
         </View>
       )}
       <View style={styles.column}>
-        <View style={{ paddingBottom: 8 }}>
-          <TextInput
-            placeholder="First Name"
-            onChangeText={(firstN) => setNames(firstN)}
-            value={names}
-            style={styles.inputText}
-          />
-        </View>
-        <View style={{ paddingBottom: 8 }}>
-          <TextInput
-            placeholder="Last Name"
-            onChangeText={(lastN) => setSurnames(lastN)}
-            value={surnames}
-            style={styles.inputText}
-          />
-        </View>
+        {role === "employee" && (
+          <>
+            <View style={{ paddingBottom: 8 }}>
+              <TextInput
+                placeholder="First Name"
+                onChangeText={(firstN) => setNames(firstN)}
+                value={names}
+                style={styles.inputText}
+              />
+            </View>
+            <View style={{ paddingBottom: 8 }}>
+              <TextInput
+                placeholder="Last Name"
+                onChangeText={(lastN) => setSurnames(lastN)}
+                value={surnames}
+                style={styles.inputText}
+              />
+            </View>
+          </>
+        )}
+        {role === "business" && (
+          <>
+            <View style={{ paddingBottom: 8 }}>
+              <TextInput
+                placeholder="Business Name"
+                onChangeText={(firstN) => setNames(firstN)}
+                value={names}
+                style={styles.inputText}
+              />
+            </View>
+          </>
+        )}
         <View style={{ paddingBottom: 8 }}>
           <TextInput
             placeholder="Password"

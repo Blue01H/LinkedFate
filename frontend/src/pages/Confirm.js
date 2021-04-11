@@ -8,19 +8,22 @@ import {
   ActivityIndicator,
 } from "react-native";
 
-import { login } from "../controllers/user";
+import { verify } from "../controllers/user";
 import useAsync from "../helpers/process";
 
-function Login({ navigation }) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginProcess, setLogin] = useAsync();
+function Confirm({ route, navigation }) {
+  const [code, setCode] = useState("");
+  const [verifyProcess, setVerify] = useAsync();
+  const { email } = route.params;
 
-  async function signIn() {
-    setLogin(async () => {
-      await login(email, password);
+  async function check() {
+    setVerify(async () => {
+      if (!email) throw new Error("No email provided.");
+      await verify(email, code);
+      navigation.navigate("login");
     });
   }
+
   return (
     <View style={styles.container}>
       <View
@@ -34,69 +37,51 @@ function Login({ navigation }) {
       </View>
 
       <View>
-        <Text style={styles.signInText}>Sign in</Text>
+        <Text style={styles.signInText}>Verify</Text>
       </View>
 
-      {loginProcess.error && (
+      {verifyProcess.error && (
         <View style={styles.btnSpace}>
           <View style={styles.flashError}>
-            <Text style={styles.flashText}>{loginProcess.error.message}</Text>
+            <Text style={styles.flashText}>{verifyProcess.error.message}</Text>
           </View>
         </View>
       )}
-
       <View style={styles.column}>
         <View style={{ paddingBottom: 8 }}>
           <TextInput
-            placeholder="Email"
-            onChangeText={(email) => setEmail(email)}
-            value={email}
+            placeholder="Verification Code"
+            onChangeText={(code) => setCode(code)}
+            value={code}
             style={styles.inputText}
-          />
-        </View>
-
-        <View style={{ paddingBottom: 8 }}>
-          <TextInput
-            placeholder="Password"
-            onChangeText={(password) => setPassword(password)}
-            value={password}
-            style={styles.inputText}
-            secureTextEntry={true}
           />
         </View>
       </View>
 
       <View style={styles.btnSpace}>
-        {!loginProcess.isLoading && (
-          <TouchableOpacity style={styles.loginBtn} onPress={() => signIn()}>
-            <Text style={styles.logoText}>Continue</Text>
+        {!verifyProcess.isLoading && (
+          <TouchableOpacity style={styles.loginBtn} onPress={() => check()}>
+            <Text style={styles.logoText}>Verify</Text>
           </TouchableOpacity>
         )}
-        {loginProcess.isLoading && <ActivityIndicator animating={true} />}
+        {verifyProcess.isLoading && <ActivityIndicator animating={true} />}
       </View>
     </View>
   );
 }
-export default Login;
+export default Confirm;
 
 const styles = StyleSheet.create({
+  radio: {
+    backgroundColor: "#000000",
+    color: "#000000",
+    left: "10%",
+    position: "relative",
+    width: "80%",
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
-  },
-  flashError: {
-    width: "80%",
-    height: 50,
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 40,
-    marginBottom: 10,
-  },
-  flashText: {
-    fontFamily: "sans-serif",
-    fontSize: 10,
-    color: "#ff0000",
-    fontWeight: "bold",
   },
   baseText: {
     fontFamily: "sans-serif",
@@ -171,7 +156,7 @@ const styles = StyleSheet.create({
     height: 50,
     alignItems: "center",
     justifyContent: "center",
-    marginTop: 35,
+    marginTop: 40,
     marginBottom: 10,
   },
   registerBtn: {
@@ -191,5 +176,19 @@ const styles = StyleSheet.create({
   },
   column: {
     flexDirection: "column",
+  },
+  flashError: {
+    width: "80%",
+    height: 50,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 40,
+    marginBottom: 10,
+  },
+  flashText: {
+    fontFamily: "sans-serif",
+    fontSize: 10,
+    color: "#ff0000",
+    fontWeight: "bold",
   },
 });
