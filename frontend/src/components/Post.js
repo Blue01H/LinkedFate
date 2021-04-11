@@ -18,7 +18,7 @@ const isCloseToBottom = ({ layoutMeasurement, contentOffset, contentSize }) => {
   );
 };
 
-function Posts({ user, byUser = undefined }) {
+function Posts({ user, byUser = undefined, displayTextOffer = false }) {
   const [postProcess, setPost] = useAsync();
   const [page, setPage] = useState([]);
   const [actualPage, setActualPage] = useState(-1);
@@ -84,17 +84,19 @@ function Posts({ user, byUser = undefined }) {
                   display: "block",
                 }}
               >
-                <Text
-                  style={{
-                    paddingTop: 5,
-                    fontFamily: "sans-serif",
-                    display: "block",
-                  }}
-                >
-                  {user && user.role && user.role == "employee"
-                    ? "New job offer!"
-                    : "Possible employee for your job!"}
-                </Text>
+                {displayTextOffer && (
+                  <Text
+                    style={{
+                      paddingTop: 5,
+                      fontFamily: "sans-serif",
+                      display: "block",
+                    }}
+                  >
+                    {user && user.role && user.role == "employee"
+                      ? "New job offer!"
+                      : "Possible employee for your job!"}
+                  </Text>
+                )}
                 <Text style={{ fontFamily: "sans-serif", display: "block" }}>
                   From: {`${page.user.names} ${page.user.surnames}`}
                 </Text>

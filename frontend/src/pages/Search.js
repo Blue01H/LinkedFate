@@ -88,7 +88,7 @@ function Search({ route, navigation }) {
             <View key={`user-${user.id}`}>
               <View>
                 <Text>
-                  {user.role == "employee"
+                  {user.role.name == "employee"
                     ? `${user.names} ${user.surnames}`
                     : user.names}
                 </Text>

@@ -34,6 +34,7 @@ function Dashboard({ navigation }) {
   async function publish() {
     setPublish(async () => {
       await create(post);
+      newPost("");
     });
   }
 
@@ -135,6 +136,7 @@ function Dashboard({ navigation }) {
                   : "Post new job request of your business"
               }
               style={{ borderRadius: 5 }}
+              value={post}
             />
           </View>
           <View
@@ -171,7 +173,7 @@ function Dashboard({ navigation }) {
         </View>
       </View>
 
-      <Posts user={user} />
+      <Posts user={user} displayTextOffer />
     </View>
   );
 }

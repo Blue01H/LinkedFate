@@ -1,18 +1,7 @@
 import React, { useState, useEffect } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-  ActivityIndicator,
-  Button,
-} from "react-native";
+import { StyleSheet, Text, View, ActivityIndicator } from "react-native";
 import Posts from "../components/Post";
-import { get } from "../controllers/post";
 import { getById, useAuth } from "../controllers/user";
-import useAsync from "../helpers/process";
-
 function UserFile({ route, navigation }) {
   const { id } = route.params;
   const [data, setData] = useState(null);

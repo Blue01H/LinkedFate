@@ -1,5 +1,5 @@
 const config = {
-  API_URL: "http://localhost:3000",
+  API_URL: "https://linkedfate.herokuapp.com",
 };
 
 export { config };
