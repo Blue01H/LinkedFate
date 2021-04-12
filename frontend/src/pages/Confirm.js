@@ -64,7 +64,9 @@ function Confirm({ route, navigation }) {
             <Text style={styles.logoText}>Verify</Text>
           </TouchableOpacity>
         )}
-        {verifyProcess.isLoading && <ActivityIndicator animating={true} />}
+        {verifyProcess.isLoading && (
+          <ActivityIndicator animating size="large" color="#0000ff" />
+        )}
       </View>
     </View>
   );

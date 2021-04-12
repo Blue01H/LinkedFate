@@ -42,11 +42,13 @@ export default function App() {
   );
 
   if (status.current === "request") {
-    return <ActivityIndicator animating={true} />;
+    return <ActivityIndicator animating size="large" color="#0000ff" />;
   }
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator
+        initialRouteName={status.current == "logged" ? "dashboard" : "welcome"}
+      >
         <Stack.Screen
           name="welcome"
           component={Welcome}

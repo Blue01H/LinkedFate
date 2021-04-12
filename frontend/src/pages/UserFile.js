@@ -46,7 +46,9 @@ function UserFile({ route, navigation }) {
               </Text>
             </View>
           </View>
-          {!data && <ActivityIndicator animating />}
+          {!data && (
+            <ActivityIndicator animating size="large" color="#0000ff" />
+          )}
           {data && (
             <>
               <View

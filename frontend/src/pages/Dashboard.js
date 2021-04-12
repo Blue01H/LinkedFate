@@ -1,34 +1,27 @@
+import { cancelable } from "cancelable-promise";
 import React, { useEffect, useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  ScrollView,
-  ActivityIndicator,
-} from "react-native";
+import { StyleSheet, Text, View, TextInput } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import { Button } from "react-native-paper";
 import Posts from "../components/Post";
-import { create, get } from "../controllers/post";
-import { logout, useAuth } from "../controllers/user";
+import {
+  getData,
+  logout,
+  searchUsers,
+  useAuth,
+  userEvent,
+} from "../controllers/user";
 import useAsync from "../helpers/process";
 
 const UselessTextInput = (props) => {
-  return (
-    <TextInput
-      {...props} // Inherit any props passed to it; e.g., multiline, numberOfLines below
-      editable
-      maxLength={40}
-    />
-  );
+  return <TextInput {...props} editable maxLength={200} />;
 };
 
 function Dashboard({ navigation }) {
   const [post, newPost] = useState("");
-  const [user, setUser] = useState(null);
   const [search, setSearch] = useState("");
 
-  const status = useAuth();
+  const [user, setUser] = useState(null);
   const [publishProcess, setPublish] = useAsync();
 
   async function publish() {
@@ -38,26 +31,39 @@ function Dashboard({ navigation }) {
     });
   }
 
+  async function load() {
+    const data = await getData();
+    setUser(data);
+  }
+
   useEffect(() => {
-    if (status.current == "error") navigation.navigate("welcome");
-    else if (status.user && !user) setUser(status.user);
-  }, [status]);
+    let promise = cancelable(load());
+    userEvent.on("change", () => {
+      promise = cancelable(load());
+    });
+    return () => {
+      promise.cancel();
+    };
+  }, []);
   return (
     <View style={styles.container}>
-      <View style={styles.logoutContainer}>
+      <View
+        style={styles.logoutContainer}
+        onTouchStart={() => navigation.navigate("dashboard")}
+      >
         <View style={styles.logoSpace}>
           <Text style={styles.baseText}>Linked</Text>
           <View style={styles.logoSquare}>
             <Text style={styles.logoText}>Fate</Text>
           </View>
         </View>
-        <View>
+        <View style={{ width: 200 }}>
           <Button
             style={{
               backgroundColor: "#2867B2",
               color: "#fff",
               marginTop: 30,
-              marginLeft: 110,
+              marginLeft: 90,
               borderRadius: 5,
             }}
             onPress={() => {
@@ -76,6 +82,7 @@ function Dashboard({ navigation }) {
             placeholder="Search"
             placeholderTextColor="#888"
             style={styles.searchBar}
+            value={search}
             onChangeText={(text) => setSearch(text)}
           />
         </View>
@@ -83,7 +90,6 @@ function Dashboard({ navigation }) {
           style={{
             backgroundColor: "#2867B2",
             color: "#fff",
-            display: "inline",
             width: 100,
             marginLeft: 5,
           }}
@@ -94,16 +100,15 @@ function Dashboard({ navigation }) {
           <Text style={{ color: "#fff" }}>Search</Text>
         </Button>
       </View>
-
-      <View>
+      <View style={{ width: 200 }}>
         <Button
           style={{
             backgroundColor: "#2867B2",
             color: "#fff",
             marginTop: 30,
-            marginLeft: "5%",
-            width: "90%",
+            marginLeft: 20,
             borderRadius: 5,
+            width: 150,
           }}
           onPress={() => {
             navigation.navigate("profile");
@@ -112,48 +117,49 @@ function Dashboard({ navigation }) {
           <Text style={styles.logoutText}>Your Profile</Text>
         </Button>
       </View>
-
-      <View style={styles.square}>
-        <View style={{ position: "relative" }}>
-          <View
-            style={{
-              backgroundColor: "#fff",
-              borderBottomColor: "#000000",
-              borderBottomWidth: "1%",
-              padding: "5%",
-              margin: "5%",
-              width: "90%",
-              borderColor: "#fff",
-            }}
-          >
-            <UselessTextInput
-              multiline
-              numberOfLines={8}
-              onChangeText={(text) => newPost(text)}
-              placeholder={
-                user && user.role && user.role == "employee"
-                  ? "Post for a new job..."
-                  : "Post new job request of your business"
-              }
-              style={{ borderRadius: 5 }}
-              value={post}
-            />
-          </View>
-          <View
-            style={{
-              position: "relative",
-              display: "block",
-              width: "30%",
-              marginLeft: "5%",
-              marginBottom: "5%",
-            }}
-          >
+      <View
+        style={{
+          position: "relative",
+          backgroundColor: "#f0f0f0",
+          padding: 10,
+          left: 20,
+          width: 320,
+          marginTop: 10,
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: "#fff",
+            borderBottomColor: "#000000",
+            borderColor: "#fff",
+          }}
+        >
+          <UselessTextInput
+            multiline
+            numberOfLines={8}
+            onChangeText={(text) => newPost(text)}
+            placeholder={
+              user && user.role && user.role == "employee"
+                ? "Post for a new job..."
+                : "Post new job request of your business"
+            }
+            style={{ borderRadius: 5, height: 100 }}
+            value={post}
+          />
+        </View>
+        <View
+          style={{
+            position: "relative",
+          }}
+        >
+          {post !== "" && (
             <Button
               style={{
                 backgroundColor: "#2867B2",
                 color: "#ffffff",
                 width: 100,
                 marginLeft: 180,
+                marginTop: 10,
               }}
               onPress={() => {
                 if (!publishProcess.isLoading) {
@@ -169,11 +175,10 @@ function Dashboard({ navigation }) {
                   : "Publish"}
               </Text>
             </Button>
-          </View>
+          )}
         </View>
       </View>
-
-      <Posts user={user} displayTextOffer />
+      {user && <Posts user={user} displayTextOffer />}
     </View>
   );
 }
@@ -182,7 +187,6 @@ export default Dashboard;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
-    display: "block",
   },
   avatar: {
     width: 40,
@@ -205,7 +209,6 @@ const styles = StyleSheet.create({
     width: 223,
     color: "#000",
     paddingLeft: 18,
-    display: "inline",
     borderColor: "#fff",
     borderWidth: 1,
   },

@@ -1,19 +1,20 @@
 import React, { useEffect } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import Slider from "./utility/Slider";
-import Welcome1 from "../img/welcome_1.jpeg";
-import Welcome2 from "../img/welcome_2.jpeg";
-import Welcome3 from "../img/welcome_3.jpeg";
 import { useAuth } from "../controllers/user";
 
-const images = [Welcome1, Welcome2, Welcome3];
+const images = [
+  "https://imgur.com/bmzJSJb.jpeg",
+  "https://imgur.com/OCBNT1k.jpeg",
+  "https://imgur.com/fa1mSYN.jpeg",
+];
 
 function Welcome({ navigation }) {
-  const status = useAuth();
+  /*const status = useAuth();
 
   useEffect(() => {
     if (status.current == "logged") navigation.navigate("dashboard");
-  }, [status]);
+  }, [status]);*/
   return (
     <View style={styles.container}>
       <View style={styles.logoSpace}>

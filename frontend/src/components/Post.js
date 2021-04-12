@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { get } from "../controllers/post";
+import { userEvent } from "../controllers/user";
 import useAsync from "../helpers/process";
 import SendEmail from "./Send";
 
@@ -50,9 +51,17 @@ function Posts({ user, byUser = undefined, displayTextOffer = false }) {
       postProcess.result
     ) {
       const { result } = postProcess;
-      setCount(result.count);
-      const pages = [...page, ...result.rows];
-      setPage(pages);
+      const pagesId = page.map((page) => page.id);
+      const rowsId = result.rows.map((page) => page.id);
+      let duplicateId = false;
+      for (const id of pagesId) {
+        if (rowsId.includes(id)) duplicateId = true;
+      }
+      if (!duplicateId) {
+        setCount(result.count);
+        const pages = [...page, ...result.rows];
+        setPage(pages);
+      }
     }
   }, [postProcess]);
 
@@ -70,10 +79,15 @@ function Posts({ user, byUser = undefined, displayTextOffer = false }) {
       scrollEventThrottle={400}
       style={styles.scrollContainer}
     >
-      {postProcess.isLoading && <ActivityIndicator animating={true} />}
+      {postProcess.isLoading && (
+        <ActivityIndicator size="large" color="#0000ff" animating />
+      )}
       {!postProcess.isLoading &&
-        page.map((page) => (
-          <View style={styles.square} key={`page-${page.id}`}>
+        page.map((page, index) => (
+          <View
+            style={styles.square}
+            key={page.id ? `page-${page.id}` : `page-${index}`}
+          >
             <View style={{ position: "relative" }}>
               <View
                 style={{
@@ -81,7 +95,6 @@ function Posts({ user, byUser = undefined, displayTextOffer = false }) {
                   width: "100%",
                   textAlign: "center",
                   padding: "2%",
-                  display: "block",
                 }}
               >
                 {displayTextOffer && (
@@ -89,7 +102,6 @@ function Posts({ user, byUser = undefined, displayTextOffer = false }) {
                     style={{
                       paddingTop: 5,
                       fontFamily: "sans-serif",
-                      display: "block",
                     }}
                   >
                     {user && user.role && user.role == "employee"
@@ -97,7 +109,7 @@ function Posts({ user, byUser = undefined, displayTextOffer = false }) {
                       : "Possible employee for your job!"}
                   </Text>
                 )}
-                <Text style={{ fontFamily: "sans-serif", display: "block" }}>
+                <Text style={{ fontFamily: "sans-serif" }}>
                   From: {`${page.user.names} ${page.user.surnames}`}
                 </Text>
               </View>
@@ -108,7 +120,6 @@ function Posts({ user, byUser = undefined, displayTextOffer = false }) {
                   textAlign: "justify",
                   padding: "2%",
                   margin: "2%",
-                  display: "block",
                   backgroundColor: "#fff",
                 }}
               >
@@ -126,10 +137,8 @@ export default Posts;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
-    display: "block",
   },
   scrollContainer: {
-    display: "block",
     backgroundColor: "#fff",
     height: 500,
     marginTop: 10,
@@ -156,7 +165,6 @@ const styles = StyleSheet.create({
     width: 223,
     color: "#000",
     paddingLeft: 18,
-    display: "inline",
     borderColor: "#fff",
     borderWidth: 1,
   },
@@ -167,7 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 10,
     width: "90%",
-    height: "30%",
+    height: 200,
     alignSelf: "center",
   },
   avatarPost: {

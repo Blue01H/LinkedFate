@@ -155,7 +155,9 @@ function Register({ navigation }) {
             <Text style={styles.logoText}>Register</Text>
           </TouchableOpacity>
         )}
-        {registerProcess.isLoading && <ActivityIndicator animating={true} />}
+        {registerProcess.isLoading && (
+          <ActivityIndicator animating size="large" color="#0000ff" />
+        )}
       </View>
     </View>
   );

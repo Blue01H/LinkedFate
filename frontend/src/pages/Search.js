@@ -29,13 +29,13 @@ function Search({ route, navigation }) {
             <Text style={styles.logoText}>Fate</Text>
           </View>
         </View>
-        <View>
+        <View style={{ width: 200 }}>
           <Button
             style={{
               backgroundColor: "#2867B2",
               color: "#fff",
               marginTop: 30,
-              marginLeft: 110,
+              marginLeft: 90,
               borderRadius: 5,
             }}
             onPress={() => {
@@ -62,7 +62,6 @@ function Search({ route, navigation }) {
           style={{
             backgroundColor: "#2867B2",
             color: "#fff",
-            display: "inline",
             width: 100,
             marginLeft: 5,
           }}
@@ -116,7 +115,6 @@ export default Search;
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#fff",
-    display: "block",
   },
   avatar: {
     width: 40,
@@ -139,7 +137,6 @@ const styles = StyleSheet.create({
     width: 223,
     color: "#000",
     paddingLeft: 18,
-    display: "inline",
     borderColor: "#fff",
     borderWidth: 1,
   },

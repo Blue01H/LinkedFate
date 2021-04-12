@@ -2,14 +2,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
 import config from "../config";
 import { cancelable } from "cancelable-promise";
+import EventEmitter from "eventemitter3";
 
-const authListeners = [];
-
-function emitAuthChanged() {
-  for (const listener of authListeners) {
-    if (typeof listener === "function") listener();
-  }
-}
+const userEvent = new EventEmitter();
 
 async function getToken() {
   const token = await AsyncStorage.getItem("@storage_token");
@@ -75,7 +70,7 @@ async function getData() {
 async function logout() {
   await AsyncStorage.removeItem("@storage_token");
   await AsyncStorage.removeItem("@storage_user");
-  emitAuthChanged();
+  userEvent.emit("change");
 }
 
 async function isLogged() {
@@ -100,7 +95,7 @@ async function login(email, password) {
     const token = await response.text();
     await setToken(token);
     const data = await getData();
-    emitAuthChanged();
+    userEvent.emit("change");
     return data;
   } else {
     const text = await response.text();
@@ -181,6 +176,10 @@ async function getById(id) {
   return users;
 }
 
+function onChange(callback) {
+  callback();
+}
+
 /**
  *
  * @returns {{current: "request"|"logged"|"error", error: Error, user: JSON}}
@@ -190,19 +189,14 @@ function useAuth() {
     current: "request",
     user: null,
     error: null,
+    reload: () => updateStatus(),
   });
 
-  useEffect(() => {
-    let promise;
-    authListeners.push(() => {
-      promise = updateStatus();
-    });
-    return () => {
-      if (promise) promise.cancel();
-    };
-  }, []);
-
   function updateStatus() {
+    setStatus({
+      ...status,
+      current: "request",
+    });
     const promise = cancelable(getData());
     promise
       .then((user) => {
@@ -223,15 +217,12 @@ function useAuth() {
   }
 
   useEffect(() => {
-    if (status.current == "request") {
-      const promise = updateStatus();
+    const promise = updateStatus();
 
-      return () => {
-        promise.cancel();
-      };
-    }
-    return void 0;
-  }, [status]);
+    return () => {
+      promise.cancel();
+    };
+  }, []);
 
   return status;
 }
@@ -263,4 +254,5 @@ export {
   verify,
   getById,
   searchUsers,
+  userEvent,
 };

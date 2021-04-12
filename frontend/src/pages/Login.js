@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from "react-native";
+import { useEffect } from "react/cjs/react.development";
 
 import { login } from "../controllers/user";
 import useAsync from "../helpers/process";
@@ -21,6 +22,11 @@ function Login({ navigation }) {
       await login(email, password);
     });
   }
+
+  useEffect(() => {
+    if (loginProcess.status === "end") navigation.navigate("dashboard");
+  }, [loginProcess]);
+
   return (
     <View style={styles.container}>
       <View
@@ -72,7 +78,9 @@ function Login({ navigation }) {
             <Text style={styles.logoText}>Continue</Text>
           </TouchableOpacity>
         )}
-        {loginProcess.isLoading && <ActivityIndicator animating={true} />}
+        {loginProcess.isLoading && (
+          <ActivityIndicator animating size="large" color="#0000ff" />
+        )}
       </View>
     </View>
   );
